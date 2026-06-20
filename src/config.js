@@ -1,7 +1,7 @@
 export const CONFIG = {
   // Keep in sync with backend `spring.mvc.apiversion.use.header` + expected header value usage.
   apiVersionHeaderName: 'API-Version',
-  apiVersionHeaderValue: '1.3',
+  apiVersionHeaderValue: '1.4',
 
   // Backend uses `@Value("${spring.application.name}")` as `systemId`.
   systemId: '2026b.Or.Shemesh',
