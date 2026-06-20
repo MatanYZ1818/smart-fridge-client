@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import * as ambientApi from '../lib/ambientApi';
 import { markProductStatus, statusClass, statusLabel } from '../lib/fridgeHelpers';
+import { ui } from '../strings/he';
 
 export default function ProductPage() {
   const { productId } = useParams();
@@ -23,7 +24,7 @@ export default function ProductPage() {
       setProduct(obj);
       setParents(Array.isArray(pars) ? pars : []);
     } catch (err) {
-      setError(err?.data?.message || err.message || 'לא הצלחנו לטעון את המוצר');
+      setError(err?.data?.message || err.message || ui.product.loadFailed);
     } finally {
       setLoading(false);
     }
@@ -40,22 +41,22 @@ export default function ProductPage() {
     setSuccess(null);
     try {
       await markProductStatus({ objectId: productId, status });
-      setSuccess(status === 'CONSUMED' ? 'המוצר סומן כנגמר' : 'המוצר סומן כזמין');
+      setSuccess(status === 'CONSUMED' ? ui.product.markedConsumed : ui.product.markedAvailable);
       await reload();
     } catch (err) {
-      setError(err?.data?.message || err.message || 'עדכון הסטטוס נכשל');
+      setError(err?.data?.message || err.message || ui.product.updateFailed);
     } finally {
       setUpdating(false);
     }
   }
 
-  if (loading) return <div className="fridge-empty">טוען מוצר...</div>;
-  if (!product) return <div className="fridge-empty">המוצר לא נמצא</div>;
+  if (loading) return <div className="fridge-empty">{ui.product.loading}</div>;
+  if (!product) return <div className="fridge-empty">{ui.product.notFound}</div>;
 
   return (
     <>
       <Link to="/devices" className="fridge-btn" style={{ display: 'inline-block', marginBottom: 16 }}>
-        חזרה למכשירים
+        {ui.product.backToDevices}
       </Link>
 
       {error ? <div className="fridge-alert error">{error}</div> : null}
@@ -71,7 +72,7 @@ export default function ProductPage() {
 
         {parents.length > 0 ? (
           <p style={{ color: 'var(--fridge-muted)' }}>
-            נמצא ב: {parents.map((p) => p.alias).join(', ')}
+            {ui.product.locatedIn}: {parents.map((p) => p.alias).join(', ')}
           </p>
         ) : null}
 
@@ -83,7 +84,7 @@ export default function ProductPage() {
               disabled={updating}
               onClick={() => setStatus('CONSUMED')}
             >
-              ✓ סימנתי שאכלתי / נגמר
+              {ui.product.markConsumed}
             </button>
           ) : (
             <button
@@ -92,7 +93,7 @@ export default function ProductPage() {
               disabled={updating}
               onClick={() => setStatus('AVAILABLE')}
             >
-              ↩ החזר לזמין
+              {ui.product.markAvailable}
             </button>
           )}
         </div>

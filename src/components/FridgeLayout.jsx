@@ -1,5 +1,6 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { ui } from '../strings/he';
 
 function roleRank(role) {
   if (!role) return 0;
@@ -20,8 +21,8 @@ export default function FridgeLayout() {
         <NavLink to="/devices" className="fridge-brand">
           <div className="fridge-logo" aria-hidden>⚙️</div>
           <div>
-            <h1>הבית החכם</h1>
-            <p>שלום, {user?.username || 'משתמש'}</p>
+            <h1>{ui.appTitle}</h1>
+            <p>{ui.nav.greeting(user?.username || ui.defaultGuestName)}</p>
           </div>
         </NavLink>
 
@@ -31,10 +32,10 @@ export default function FridgeLayout() {
             className={({ isActive }) => (isActive ? 'active' : undefined)}
             end
           >
-            המכשירים שלי
+            {ui.nav.myDevices}
           </NavLink>
           <NavLink to="/profile" className={({ isActive }) => (isActive ? 'active' : undefined)}>
-            הפרופיל שלי
+            {ui.nav.myProfile}
           </NavLink>
           <button
             type="button"
@@ -44,7 +45,7 @@ export default function FridgeLayout() {
               navigate('/login');
             }}
           >
-            יציאה
+            {ui.nav.logout}
           </button>
         </nav>
       </header>

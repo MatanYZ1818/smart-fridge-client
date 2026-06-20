@@ -15,6 +15,7 @@ import {
   statusClass,
   statusLabel,
 } from '../lib/fridgeHelpers';
+import { ui } from '../strings/he';
 
 export default function DevicePage() {
   const { deviceId } = useParams();
@@ -41,7 +42,7 @@ export default function DevicePage() {
       setContents(data.contents);
       setParents(data.parents);
     } catch (err) {
-      setError(err?.data?.message || err.message || 'לא הצלחנו לטעון את המכשיר');
+      setError(err?.data?.message || err.message || ui.device.loadFailed);
     } finally {
       setLoading(false);
     }
@@ -58,9 +59,9 @@ export default function DevicePage() {
     setSuccess(null);
     try {
       await runCommand(device, command, () => invokeDeviceCommand({ user, device, command }));
-      setSuccess(`הפקודה "${command.label}" הופעלה בהצלחה`);
+      setSuccess(ui.device.commandSuccess(command.label));
     } catch (err) {
-      setError(err?.data?.message || err.message || 'הפעלת הפקודה נכשלה');
+      setError(err?.data?.message || err.message || ui.device.commandFailed);
     }
   }
 
@@ -70,10 +71,10 @@ export default function DevicePage() {
     setSuccess(null);
     try {
       await markProductStatus({ objectId: item.id.objectId, status });
-      setSuccess(`הפריט "${item.alias}" עודכן`);
+      setSuccess(ui.device.itemUpdated(item.alias));
       await reload();
     } catch (err) {
-      setError(err?.data?.message || err.message || 'עדכון הפריט נכשל');
+      setError(err?.data?.message || err.message || ui.device.updateItemFailed);
     } finally {
       setUpdatingItemId(null);
     }
@@ -87,23 +88,23 @@ export default function DevicePage() {
     setSuccess(null);
     try {
       await addItemToDevice({ user, device, alias: newItemName.trim() });
-      setSuccess(`"${newItemName.trim()}" נוסף לתכולה`);
+      setSuccess(ui.device.itemAdded(newItemName.trim()));
       setNewItemName('');
       await reload();
     } catch (err) {
-      setError(err?.data?.message || err.message || 'הוספת הפריט נכשלה');
+      setError(err?.data?.message || err.message || ui.device.addItemFailed);
     } finally {
       setAdding(false);
     }
   }
 
-  if (loading) return <div className="fridge-empty">טוען מכשיר...</div>;
-  if (!device) return <div className="fridge-empty">המכשיר לא נמצא</div>;
+  if (loading) return <div className="fridge-empty">{ui.device.loading}</div>;
+  if (!device) return <div className="fridge-empty">{ui.device.notFound}</div>;
 
   return (
     <>
       <Link to="/devices" className="fridge-btn" style={{ display: 'inline-block', marginBottom: 16 }}>
-        חזרה למכשירים
+        {ui.device.backToDevices}
       </Link>
 
       {error ? <div className="fridge-alert error">{error}</div> : null}
@@ -120,11 +121,11 @@ export default function DevicePage() {
         </div>
 
         {parents.length > 0 ? (
-          <p className="device-location">נמצא בתוך: {parents.map((p) => p.alias).join(', ')}</p>
+          <p className="device-location">{ui.device.locatedIn}: {parents.map((p) => p.alias).join(', ')}</p>
         ) : null}
 
         <div className="fridge-section-title inner">
-          <h2>פקודות זמינות</h2>
+          <h2>{ui.device.commandsTitle}</h2>
         </div>
         <div className="command-list expanded">
           {getAvailableCommands(device).map((command) => (
@@ -143,11 +144,11 @@ export default function DevicePage() {
       {isContainer(device) ? (
         <section className="fridge-form device-contents">
           <div className="fridge-section-title inner">
-            <h2>תכולה</h2>
+            <h2>{ui.device.contentsTitle}</h2>
           </div>
 
           {contents.length === 0 ? (
-            <div className="fridge-empty compact">אין כרגע פריטים בתוך המכשיר.</div>
+            <div className="fridge-empty compact">{ui.device.emptyContents}</div>
           ) : (
             <div className="content-list">
               {contents.map((item) => (
@@ -164,7 +165,7 @@ export default function DevicePage() {
                         disabled={updatingItemId === item.id.objectId}
                         onClick={() => setItemStatus(item, 'CONSUMED')}
                       >
-                        סמן כנגמר
+                        {ui.device.markConsumed}
                       </button>
                     ) : (
                       <button
@@ -173,7 +174,7 @@ export default function DevicePage() {
                         disabled={updatingItemId === item.id.objectId}
                         onClick={() => setItemStatus(item, 'AVAILABLE')}
                       >
-                        החזר לזמין
+                        {ui.device.markAvailable}
                       </button>
                     )}
                   </div>
@@ -185,16 +186,16 @@ export default function DevicePage() {
           {canManage ? (
             <form className="add-item-form" onSubmit={addItem}>
               <div className="fridge-field">
-                <label htmlFor="new-item-name">הוספת פריט לתכולה</label>
+                <label htmlFor="new-item-name">{ui.device.addItemLabel}</label>
                 <input
                   id="new-item-name"
                   value={newItemName}
                   onChange={(e) => setNewItemName(e.target.value)}
-                  placeholder="לדוגמה: חלב, קפסולות קפה, ירקות"
+                  placeholder={ui.device.addItemPlaceholder}
                 />
               </div>
               <button type="submit" className="fridge-btn fridge-btn-primary" disabled={adding || !newItemName.trim()}>
-                {adding ? 'מוסיף...' : 'הוסף פריט'}
+                {adding ? ui.device.adding : ui.device.addItem}
               </button>
             </form>
           ) : null}

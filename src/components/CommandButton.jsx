@@ -1,4 +1,5 @@
 import { commandButtonKey } from '../lib/fridgeHelpers';
+import { ui } from '../strings/he';
 
 export default function CommandButton({
   device,
@@ -30,7 +31,7 @@ export default function CommandButton({
       ) : isActive ? (
         <span className="command-btn-content">
           <span className="command-spinner" aria-hidden />
-          <span>מפעיל...</span>
+          <span>{ui.commandButton.running}</span>
         </span>
       ) : (
         command.label

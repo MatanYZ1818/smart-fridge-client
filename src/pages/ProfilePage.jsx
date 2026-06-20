@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { ui } from '../strings/he';
 
 export default function ProfilePage() {
   const { user, updateProfile, logout } = useAuth();
@@ -11,11 +12,11 @@ export default function ProfilePage() {
 
   return (
     <div className="fridge-form" style={{ maxWidth: 520 }}>
-      <h2 style={{ marginTop: 0 }}>הפרופיל שלי</h2>
+      <h2 style={{ marginTop: 0 }}>{ui.profile.title}</h2>
       <p style={{ color: 'var(--fridge-muted)' }}>
-        אימייל: <b>{user?.userId?.email}</b>
+        {ui.profile.email}: <b>{user?.userId?.email}</b>
         <br />
-        תפקיד: <b>{user?.role}</b>
+        {ui.profile.role}: <b>{user?.role}</b>
       </p>
 
       {error ? <div className="fridge-alert error">{error}</div> : null}
@@ -27,7 +28,7 @@ export default function ProfilePage() {
           setError(null);
           setMessage(null);
           if (!password.trim()) {
-            setError('יש להזין סיסמה נוכחית');
+            setError(ui.profile.passwordRequired);
             return;
           }
           try {
@@ -41,28 +42,28 @@ export default function ProfilePage() {
                 password: newPassword.trim() || undefined,
               },
             });
-            setMessage('הפרופיל עודכן בהצלחה');
+            setMessage(ui.profile.updateSuccess);
             setPassword('');
             setNewPassword('');
           } catch (err) {
-            setError(err?.data?.message || err.message || 'עדכון נכשל');
+            setError(err?.data?.message || err.message || ui.profile.updateFailed);
           }
         }}
       >
         <div className="fridge-field">
-          <label htmlFor="username">שם תצוגה</label>
+          <label htmlFor="username">{ui.profile.displayNameLabel}</label>
           <input id="username" value={username} onChange={(e) => setUsername(e.target.value)} />
         </div>
         <div className="fridge-field">
-          <label htmlFor="password">סיסמה נוכחית</label>
+          <label htmlFor="password">{ui.profile.currentPasswordLabel}</label>
           <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
         </div>
         <div className="fridge-field">
-          <label htmlFor="new-password">סיסמה חדשה (אופציונלי)</label>
+          <label htmlFor="new-password">{ui.profile.newPasswordLabel}</label>
           <input id="new-password" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
         </div>
         <button type="submit" className="fridge-btn fridge-btn-primary">
-          שמור שינויים
+          {ui.profile.save}
         </button>
       </form>
 
@@ -72,7 +73,7 @@ export default function ProfilePage() {
         style={{ marginTop: 16 }}
         onClick={logout}
       >
-        התנתק
+        {ui.profile.disconnect}
       </button>
     </div>
   );

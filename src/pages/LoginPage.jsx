@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { ui } from '../strings/he';
 
 export default function LoginPage() {
   const { login, register } = useAuth();
@@ -20,8 +21,8 @@ export default function LoginPage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
           <div className="fridge-logo" aria-hidden>🧊</div>
           <div>
-            <h1>הבית החכם</h1>
-            <p className="subtitle">צפו במכשירים, הפעילו פקודות ונהלו תכולה</p>
+            <h1>{ui.appTitle}</h1>
+            <p className="subtitle">{ui.login.subtitle}</p>
           </div>
         </div>
 
@@ -33,14 +34,14 @@ export default function LoginPage() {
             className={`fridge-btn ${mode === 'login' ? 'fridge-btn-primary' : ''}`}
             onClick={() => { setMode('login'); setError(null); }}
           >
-            התחברות
+            {ui.login.loginTab}
           </button>
           <button
             type="button"
             className={`fridge-btn ${mode === 'register' ? 'fridge-btn-primary' : ''}`}
             onClick={() => { setMode('register'); setError(null); }}
           >
-            הרשמה
+            {ui.login.registerTab}
           </button>
         </div>
 
@@ -54,7 +55,7 @@ export default function LoginPage() {
                 navigate('/devices');
               } else {
                 if (!username.trim()) {
-                  setError('יש להזין שם משתמש');
+                  setError(ui.login.usernameRequired);
                   return;
                 }
                 await register({
@@ -68,38 +69,38 @@ export default function LoginPage() {
                 navigate('/devices');
               }
             } catch (err) {
-              setError(err?.data?.message || err.message || 'הפעולה נכשלה');
+              setError(err?.data?.message || err.message || ui.login.actionFailed);
             }
           }}
         >
           {mode === 'register' ? (
             <div className="fridge-field">
-              <label htmlFor="username">שם</label>
-              <input id="username" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="השם שלך" />
+              <label htmlFor="username">{ui.login.usernameLabel}</label>
+              <input id="username" value={username} onChange={(e) => setUsername(e.target.value)} placeholder={ui.login.usernamePlaceholder} />
             </div>
           ) : null}
 
           <div className="fridge-field">
-            <label htmlFor="email">אימייל</label>
+            <label htmlFor="email">{ui.login.emailLabel}</label>
             <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
           </div>
 
           <div className="fridge-field">
-            <label htmlFor="password">סיסמה</label>
-            <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="סיסמה חזקה" />
+            <label htmlFor="password">{ui.login.passwordLabel}</label>
+            <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder={ui.login.passwordPlaceholder} />
           </div>
 
           <button type="submit" className="fridge-btn fridge-btn-primary" disabled={disabled} style={{ width: '100%' }}>
-            {mode === 'login' ? 'כניסה למערכת' : 'יצירת חשבון'}
+            {mode === 'login' ? ui.login.submitLogin : ui.login.submitRegister}
           </button>
         </form>
 
         <div className="fridge-demo-hint">
-          <b>לניסוי עם נתוני הדמו:</b>
+          <b>{ui.login.demoHintTitle}</b>
           <br />
-          אימייל: initializer@afeka.ac.il
+          {ui.login.demoEmailLabel}: initializer@afeka.ac.il
           <br />
-          סיסמה: Admin123!
+          {ui.login.demoPasswordLabel}: Admin123!
         </div>
       </div>
     </div>

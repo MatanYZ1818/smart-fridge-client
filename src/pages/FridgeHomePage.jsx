@@ -13,6 +13,7 @@ import {
   statusClass,
   statusLabel,
 } from '../lib/fridgeHelpers';
+import { ui } from '../strings/he';
 
 export default function FridgeHomePage({ canManage }) {
   const { user } = useAuth();
@@ -31,7 +32,7 @@ export default function FridgeHomePage({ canManage }) {
       setDevices(data.devices);
       setProducts(data.products);
     } catch (err) {
-      setError(err?.data?.message || err.message || 'לא הצלחנו לטעון את המכשירים');
+      setError(err?.data?.message || err.message || ui.home.loadFailed);
     } finally {
       setLoading(false);
     }
@@ -47,9 +48,9 @@ export default function FridgeHomePage({ canManage }) {
     setSuccess(null);
     try {
       await runCommand(device, command, () => invokeDeviceCommand({ user, device, command }));
-      setSuccess(`הפקודה "${command.label}" הופעלה על ${device.alias}`);
+      setSuccess(ui.home.commandSuccess(command.label, device.alias));
     } catch (err) {
-      setError(err?.data?.message || err.message || 'הפעלת הפקודה נכשלה');
+      setError(err?.data?.message || err.message || ui.home.commandFailed);
     }
   }
 
@@ -63,28 +64,28 @@ export default function FridgeHomePage({ canManage }) {
 
       <section className="fridge-hero">
         <div>
-          <h2>הבית החכם שלי</h2>
+          <h2>{ui.home.title}</h2>
           <p>
             {loading
-              ? 'טוען...'
-              : `${activeDevices} מכשירים פעילים, ${availableProducts} פריטים זמינים בתכולה`}
+              ? ui.home.loading
+              : ui.home.statsSummary(activeDevices, availableProducts)}
           </p>
         </div>
         <div className="fridge-hero-actions">
           <button type="button" className="fridge-btn" onClick={reload}>
-            רענון
+            {ui.home.refresh}
           </button>
         </div>
       </section>
 
       <div className="fridge-section-title">
-        <h2>מכשירים ופעולות</h2>
+        <h2>{ui.home.devicesSection}</h2>
       </div>
 
       {loading ? (
-        <div className="fridge-empty">טוען מכשירים...</div>
+        <div className="fridge-empty">{ui.home.loadingDevices}</div>
       ) : devices.length === 0 ? (
-        <div className="fridge-empty">לא נמצאו מכשירים במערכת. ודא שה-backend רץ עם נתוני דמו.</div>
+        <div className="fridge-empty">{ui.home.noDevices}</div>
       ) : (
         <div className="fridge-grid">
           {devices.map((device) => (
@@ -100,11 +101,11 @@ export default function FridgeHomePage({ canManage }) {
               <div className="device-meta">
                 <span className={`status-pill ${statusClass(device.status)}`}>{statusLabel(device.status)}</span>
                 {isContainer(device) ? (
-                  <span className="device-count">{device.contents?.length || 0} פריטים</span>
+                  <span className="device-count">{ui.home.itemCount(device.contents?.length || 0)}</span>
                 ) : null}
               </div>
 
-              <div className="command-list" aria-label={`פקודות עבור ${device.alias}`}>
+              <div className="command-list" aria-label={ui.home.commandsForDevice(device.alias)}>
                 {getAvailableCommands(device).map((command) => (
                   <CommandButton
                     key={command.name}
@@ -121,7 +122,7 @@ export default function FridgeHomePage({ canManage }) {
                 to={`/devices/${encodeURIComponent(device.id.objectId)}`}
                 className="fridge-btn fridge-btn-primary device-details-link"
               >
-                פרטי מכשיר ותכולה
+                {ui.home.deviceDetailsLink}
               </Link>
             </article>
           ))}
@@ -129,7 +130,7 @@ export default function FridgeHomePage({ canManage }) {
       )}
 
       {!canManage ? (
-        <p className="fridge-footnote">משתמש רגיל יכול להפעיל פקודות ולצפות בתכולה. ניהול פריטים זמין למפעילים ומנהלים.</p>
+        <p className="fridge-footnote">{ui.home.footnote}</p>
       ) : null}
     </>
   );

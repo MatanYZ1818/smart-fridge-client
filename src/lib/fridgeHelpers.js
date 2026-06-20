@@ -1,5 +1,13 @@
 import * as ambientApi from './ambientApi';
 import { CONFIG } from '../config';
+import {
+  matchesCoffee,
+  matchesDishwasher,
+  matchesFridge,
+  matchesOven,
+  matchesStorage,
+} from './deviceAliases';
+import { commandLabels, deviceDescriptions, statusLabels, ui } from '../strings/he';
 
 const PRODUCT_TYPE = 'PRODUCT';
 const CONTAINER_TYPE = 'CONTAINER';
@@ -33,16 +41,20 @@ export function isContainer(object) {
 export function deviceIcon(object) {
   const alias = object?.alias || '';
   const category = object?.objectDetails?.category;
-  if (/fridge|refrigerator|מקרר/i.test(alias) || category === 'cold-storage') return '🧊';
-  if (/oven|תנור/i.test(alias) || category === 'cooking') return '🔥';
-  if (/coffee|קפה/i.test(alias) || category === 'drink-maker') return '☕';
-  if (/dishwasher|מדיח/i.test(alias) || category === 'cleaning') return '🍽️';
-  if (/pantry|cabinet|ארון|מזווה/i.test(alias) || category === 'storage') return '📦';
+  if (matchesFridge(alias) || category === 'cold-storage') return '🧊';
+  if (matchesOven(alias) || category === 'cooking') return '🔥';
+  if (matchesCoffee(alias) || category === 'drink-maker') return '☕';
+  if (matchesDishwasher(alias) || category === 'cleaning') return '🍽️';
+  if (matchesStorage(alias) || category === 'storage') return '📦';
   return '⚙️';
 }
 
 export function deviceDescription(object) {
-  return object?.objectDetails?.description || 'מכשיר חכם שמחובר למערכת';
+  const category = object?.objectDetails?.category;
+  if (category && deviceDescriptions[category]) {
+    return deviceDescriptions[category];
+  }
+  return ui.defaultDeviceDescription;
 }
 
 export function getAvailableCommands(object) {
@@ -51,50 +63,37 @@ export function getAvailableCommands(object) {
     return commands.map((cmd) => (
       typeof cmd === 'string'
         ? { name: cmd, label: commandLabel(cmd) }
-        : { label: commandLabel(cmd.name), ...cmd }
+        : { ...cmd, label: commandLabel(cmd.name) }
     ));
   }
 
   if (isContainer(object)) {
     return [
-      { name: 'OPEN_DOOR', label: 'פתח דלת' },
-      { name: 'CHECK_CONTENTS', label: 'בדוק תכולה' },
+      { name: 'OPEN_DOOR', label: commandLabels.OPEN_DOOR },
+      { name: 'CHECK_CONTENTS', label: commandLabels.CHECK_CONTENTS },
     ];
   }
 
   return [
-    { name: 'TURN_ON', label: 'הפעל' },
-    { name: 'TURN_OFF', label: 'כבה' },
+    { name: 'TURN_ON', label: commandLabels.TURN_ON },
+    { name: 'TURN_OFF', label: commandLabels.TURN_OFF },
   ];
 }
 
 export function commandLabel(commandName) {
-  const map = {
-    OPEN_DOOR: 'פתח דלת',
-    CLOSE_DOOR: 'סגור דלת',
-    CHECK_CONTENTS: 'בדוק תכולה',
-    SET_TEMPERATURE: 'כוון טמפרטורה',
-    START_COOLING: 'הפעל קירור',
-    PREHEAT: 'חימום מוקדם',
-    TURN_ON: 'הפעל',
-    TURN_OFF: 'כבה',
-    START_BREW: 'הכן קפה',
-    START_WASH: 'הפעל שטיפה',
-    ECO_MODE: 'מצב חסכוני',
-  };
-  return map[commandName] || commandName;
+  return commandLabels[commandName] || commandName;
 }
 
 export function isDishwasherDevice(device) {
   const category = device?.objectDetails?.category;
   const alias = device?.alias || '';
-  return category === 'cleaning' || /dishwasher|מדיח/i.test(alias);
+  return category === 'cleaning' || matchesDishwasher(alias);
 }
 
 export function isCoffeeMachineDevice(device) {
   const category = device?.objectDetails?.category;
   const alias = device?.alias || '';
-  return category === 'drink-maker' || /coffee|קפה/i.test(alias);
+  return category === 'drink-maker' || matchesCoffee(alias);
 }
 
 /** Returns countdown seconds for long-running device activations, or null for instant feedback only. */
@@ -175,7 +174,7 @@ export async function findRefrigerator() {
   const list = Array.isArray(objects) ? objects : [];
   return (
     list.find((o) => o.alias === 'Refrigerator') ||
-    list.find((o) => o.type === 'CONTAINER' && /fridge|refrigerator|מקרר/i.test(o.alias || '')) ||
+    list.find((o) => o.type === 'CONTAINER' && matchesFridge(o.alias || '')) ||
     list.find((o) => o.type === 'CONTAINER') ||
     null
   );
@@ -240,16 +239,8 @@ export async function addItemToDevice({ user, device, alias, status = 'AVAILABLE
 }
 
 export function statusLabel(status) {
-  if (!status) return 'לא ידוע';
-  const map = {
-    AVAILABLE: 'זמין',
-    CONSUMED: 'נגמר',
-    ACTIVE: 'פעיל',
-    READY: 'מוכן',
-    ON: 'פועל',
-    OFF: 'כבוי',
-  };
-  return map[status.toUpperCase()] || status;
+  if (!status) return ui.unknownStatus;
+  return statusLabels[status.toUpperCase()] || status;
 }
 
 export function statusClass(status) {

@@ -7,6 +7,6 @@ export const CONFIG = {
   systemId: '2026b.Or.Shemesh',
 
   // Backend base URL (Vite dev server calls Spring Boot).
-  apiBaseUrl: 'http://localhost:8081',
+  apiBaseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081',
 };
 
