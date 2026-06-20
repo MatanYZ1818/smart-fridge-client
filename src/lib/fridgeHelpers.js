@@ -85,6 +85,40 @@ export function commandLabel(commandName) {
   return map[commandName] || commandName;
 }
 
+export function isDishwasherDevice(device) {
+  const category = device?.objectDetails?.category;
+  const alias = device?.alias || '';
+  return category === 'cleaning' || /dishwasher|מדיח/i.test(alias);
+}
+
+export function isCoffeeMachineDevice(device) {
+  const category = device?.objectDetails?.category;
+  const alias = device?.alias || '';
+  return category === 'drink-maker' || /coffee|קפה/i.test(alias);
+}
+
+/** Returns countdown seconds for long-running device activations, or null for instant feedback only. */
+export function getCommandRunDuration(device, command) {
+  const name = command?.name;
+  if (!name || !device) return null;
+
+  if (isDishwasherDevice(device)) {
+    if (name === 'START_WASH') return 45;
+    if (name === 'ECO_MODE') return 60;
+  }
+
+  if (isCoffeeMachineDevice(device)) {
+    if (name === 'START_BREW') return 20;
+    if (name === 'TURN_ON') return 5;
+  }
+
+  return null;
+}
+
+export function commandButtonKey(device, command) {
+  return `${device.id.objectId}:${command.name}`;
+}
+
 export async function loadDevicesDashboard() {
   const objects = await ambientApi.getAllObjects();
   const list = Array.isArray(objects) ? objects : [];

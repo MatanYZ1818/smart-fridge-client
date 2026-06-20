@@ -254,6 +254,43 @@ body {
   font-size: 0.82rem;
 }
 
+.command-btn-busy {
+  opacity: 0.85;
+  cursor: not-allowed;
+}
+
+.command-btn-content {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.command-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: command-spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+.command-countdown {
+  min-width: 1.5em;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  padding: 1px 6px;
+  border-radius: 8px;
+  background: rgba(14, 165, 233, 0.15);
+}
+
+@keyframes command-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .device-details-link {
   margin-top: auto;
   text-align: center;

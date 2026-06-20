@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import CommandButton from '../components/CommandButton';
 import { useAuth } from '../context/AuthContext';
+import { useCommandRunner } from '../hooks/useCommandRunner';
 import {
   deviceDescription,
   deviceIcon,
@@ -19,7 +21,7 @@ export default function FridgeHomePage({ canManage }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
-  const [commandKey, setCommandKey] = useState(null);
+  const { activeKey, countdown, runCommand } = useCommandRunner();
 
   const reload = useCallback(async () => {
     setError(null);
@@ -41,17 +43,13 @@ export default function FridgeHomePage({ canManage }) {
   }, [reload]);
 
   async function handleCommand(device, command) {
-    const key = `${device.id.objectId}:${command.name}`;
-    setCommandKey(key);
     setError(null);
     setSuccess(null);
     try {
-      await invokeDeviceCommand({ user, device, command });
+      await runCommand(device, command, () => invokeDeviceCommand({ user, device, command }));
       setSuccess(`הפקודה "${command.label}" הופעלה על ${device.alias}`);
     } catch (err) {
       setError(err?.data?.message || err.message || 'הפעלת הפקודה נכשלה');
-    } finally {
-      setCommandKey(null);
     }
   }
 
@@ -107,20 +105,16 @@ export default function FridgeHomePage({ canManage }) {
               </div>
 
               <div className="command-list" aria-label={`פקודות עבור ${device.alias}`}>
-                {getAvailableCommands(device).map((command) => {
-                  const key = `${device.id.objectId}:${command.name}`;
-                  return (
-                    <button
-                      key={command.name}
-                      type="button"
-                      className="fridge-btn command-btn"
-                      disabled={commandKey === key}
-                      onClick={() => handleCommand(device, command)}
-                    >
-                      {commandKey === key ? 'מפעיל...' : command.label}
-                    </button>
-                  );
-                })}
+                {getAvailableCommands(device).map((command) => (
+                  <CommandButton
+                    key={command.name}
+                    device={device}
+                    command={command}
+                    activeKey={activeKey}
+                    countdown={countdown}
+                    onClick={() => handleCommand(device, command)}
+                  />
+                ))}
               </div>
 
               <Link
