@@ -1,5 +1,10 @@
 import AppRouter from './router';
+import { BrowserRouter } from 'react-router-dom';
 
 export default function App() {
-  return <AppRouter />;
+  return (
+    <BrowserRouter basename = "/smart-fridge-client">
+      <AppRouter />
+    </BrowserRouter>
+  );
 }
