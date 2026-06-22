@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
+  base: '/smart-fridge-client/',
   server: {
     host: '0.0.0.0', // This exposes the server to your local machine
     port: 5173,      // Ensure this matches the port mapped in your devcontainer.json
